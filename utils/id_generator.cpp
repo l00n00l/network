@@ -43,6 +43,9 @@ uint64 id_generator::gen() {
   // 把当前值自增
   else {
     ret = ++impl_ptr->cur_id;
+    if (ret == 0) {
+      ret = ++impl_ptr->cur_id;
+    }
   }
 
   atomic_flag_release(impl_ptr->writing_flag);

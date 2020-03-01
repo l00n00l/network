@@ -34,9 +34,14 @@ uint64 session_mgr::create_session(tcp::socket &socket,
 uint64 session_mgr::create_session(std::string &proto_name, std::string &host,
                                    std::string &port) {
   auto ret = bind_executor(impl_ptr->strand, [this, &host, &port, &proto_name] {
+    tcp::resolver resolver(impl_ptr->strand);
+    auto endpoints = resolver.resolve(host, port);
+    if (endpoints.size() <= 0) {
+      return uint64(0);
+    }
     auto new_id = impl_ptr->id_gen.gen();
     auto new_session = std::make_shared<tcp_session>(
-        new_id, impl_ptr->strand.context(), proto_name, host, port);
+        new_id, impl_ptr->strand.context(), proto_name, endpoints);
     impl_ptr->tcp_sessions[new_id] = new_session;
     return new_id;
   })();
@@ -44,8 +49,10 @@ uint64 session_mgr::create_session(std::string &proto_name, std::string &host,
 }
 
 void session_mgr::remove_session(uint64 id) {
-  bind_executor(impl_ptr->strand,
-                [this, &id] { impl_ptr->tcp_sessions.erase(id); })();
+  bind_executor(impl_ptr->strand, [this, &id] {
+    impl_ptr->tcp_sessions.erase(id);
+    impl_ptr->id_gen.recycle(id);
+  })();
 }
 
 bool session_mgr::session_valid(uint64 session_id) {

@@ -22,6 +22,7 @@ using boost::asio::ip::tcp;
 using boost::asio::ip::udp;
 using boost::system::error_code;
 
+typedef boost::asio::ip::basic_resolver_results<tcp> tcp_resolve_result;
 typedef boost::asio::strand<boost::asio::executor> exe_strand;
 
 #define atomic_flag_acquire(flag)                                              \

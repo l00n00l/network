@@ -18,7 +18,9 @@ int main() {
       });
   g_server_mgr->create_server(tcp::endpoint(tcp::v4(), 1234),
                               std::string("control"));
-
+  // g_session_mgr->create_session(std::string("control"),
+  //                              std::string("localhost"),
+  //                              std::string("12345"));
   auto core_count = std::thread::hardware_concurrency();
   std::list<std::thread> thread_list;
   for (size_t i = 1; i < core_count; i++) {
