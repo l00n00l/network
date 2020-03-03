@@ -55,8 +55,13 @@ private:
 messge_handler controlhandler = nullptr;
 void regist_contol_handler(messge_handler handler) { controlhandler = handler; }
 
+#ifdef _WINDOWS
+#define _DLLExport __declspec(dllexport)
+#else
+#define _DLLExport
+#endif // _WINDOWS
 extern "C" {
-void c_regiest_control_handler(messge_handler handler) {
+_DLLExport void c_regiest_control_handler(messge_handler handler) {
   controlhandler = handler;
 }
 }

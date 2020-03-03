@@ -10,6 +10,10 @@ if(Boost_FOUND)
 	link_libraries(${Boost_LIBRARIES})
 endif()
 
+if(UNIX)
+add_compile_options(-fPIC)
+endif()
+
 aux_source_directory(. src)
 
 add_library(utils  ${src})
