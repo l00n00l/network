@@ -62,8 +62,8 @@ void tcp_session::_do_read() {
       _set_reconnect_timer();
     return;
   }
-  async_read(
-      impl_ptr->socket,
+
+  impl_ptr->socket.async_read_some(
       buffer(impl_ptr->proto_ptr->read_buffer_ptr(),
              impl_ptr->proto_ptr->read_buffer_size()),
       bind_executor(impl_ptr->strand, [this](error_code ec, std::size_t size) {

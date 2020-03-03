@@ -15,6 +15,6 @@ struct tcp_proto {
 
 std::unique_ptr<tcp_proto> create_proto(std::string &proto_name);
 
-typedef void (*control_handler)(char *data, std::size_t size,
-                                uint64 session_id);
-void regist_contol_handler(control_handler handler);
+typedef void (*messge_handler)(char *data, std::size_t size, uint64 session_id);
+void regist_rawtcp_handler(messge_handler handler);
+void regist_contol_handler(messge_handler handler);

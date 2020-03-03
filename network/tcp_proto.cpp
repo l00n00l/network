@@ -19,49 +19,74 @@ private:
   std::string write_buffer;
 };
 
-struct tcp_clienttest : public tcp_proto {
+messge_handler rawtcp_handler = nullptr;
+void regist_rawtcp_handler(messge_handler handler) { rawtcp_handler = handler; }
+struct tcp_rawtcp : public tcp_proto {
   virtual char *read_buffer_ptr() { return read_buffer; }
   virtual const char *write_buffer_ptr() { return write_buffer.c_str(); }
-  virtual std::size_t read_buffer_size() { return 512; }
+  virtual std::size_t read_buffer_size() { return read_size; }
   virtual std::size_t write_buffer_size() { return write_buffer.size(); }
-  virtual void read_done(std::size_t size, uint64 session_id) {}
-  virtual void write_done(std::size_t size) {}
+  virtual void read_done(std::size_t size, uint64 session_id) {
+    if (rawtcp_handler) {
+      rawtcp_handler(read_buffer, size, session_id);
+    }
+  }
+  virtual void write_done(std::size_t size) {
+    auto cur_size = write_msg_queue.size();
+    if (cur_size > 0)
+      write_msg_queue.pop_front();
+    if (cur_size > 1)
+      write_buffer = write_msg_queue.front();
+  }
   virtual bool has_data_to_write() { return write_buffer.size() > 0; }
-  virtual void write(std::string &msg) { write_buffer = msg; }
+  virtual void write(std::string &msg) {
+    if (write_msg_queue.size() <= 0)
+      write_buffer = msg;
+    write_msg_queue.push_back(msg);
+  }
 
 private:
-  char read_buffer[512];
+  enum { read_size = 512 };
+  char read_buffer[read_size];
   std::string write_buffer;
+  std::list<std::string> write_msg_queue;
 };
 
-control_handler controlhandler = nullptr;
-void regist_contol_handler(control_handler handler) {
-  controlhandler = handler;
-}
+messge_handler controlhandler = nullptr;
+void regist_contol_handler(messge_handler handler) { controlhandler = handler; }
 
 extern "C" {
-__declspec(dllexport) void c_regiest_control_handler(control_handler handler) {
+__declspec(dllexport) void c_regiest_control_handler(messge_handler handler) {
   controlhandler = handler;
 }
 }
 
 struct tcp_control : public tcp_proto {
-  tcp_control() : reading_header(true), body_length(0), read_buffer{0} {}
+  tcp_control()
+      : reading_header(true), body_length(0), read_buffer{0}, read_size(0) {}
   virtual char *read_buffer_ptr() {
-    return reading_header ? read_buffer : read_buffer + head_length;
+    auto ret = reading_header ? read_buffer : read_buffer + head_length;
+    return ret + read_size;
   }
   virtual const char *write_buffer_ptr() { return write_buffer.c_str(); }
   virtual std::size_t read_buffer_size() {
-    return reading_header ? head_length : body_length;
+    auto ret = reading_header ? head_length : body_length;
+    return ret - read_size;
   }
   virtual std::size_t write_buffer_size() { return write_buffer.size(); }
   virtual void read_done(std::size_t size, uint64 session_id) {
-    if (reading_header) {
+    read_size += size;
+
+    if (reading_header && read_size >= head_length) {
+      // 读取头部
       _decode_header();
-    }
-    reading_header = !reading_header;
-    if (reading_header) {
-      controlhandler(read_buffer + head_length, size, session_id);
+      read_size -= head_length;
+      reading_header = !reading_header;
+    } else if (read_size >= body_length) {
+      // 读取包体
+      controlhandler(read_buffer + head_length, body_length, session_id);
+      reading_header = !reading_header;
+      read_size = 0;
     }
   }
   virtual void write_done(std::size_t size) {
@@ -109,6 +134,7 @@ private:
   enum { head_length = 4, max_body_length = 512 };
   char read_buffer[head_length + max_body_length + 1];
   bool reading_header;
+  std::size_t read_size;
   std::size_t body_length;
   std::list<std::string> write_buffer_list;
   std::string write_buffer;
@@ -119,8 +145,8 @@ private:
 std::unique_ptr<tcp_proto> create_proto(std::string &proto_name) {
   if (proto_name == "echo") {
     return make_proto(echo);
-  } else if (proto_name == "clienttest") {
-    return make_proto(clienttest);
+  } else if (proto_name == "rawtcp") {
+    return make_proto(rawtcp);
   } else if (proto_name == "control") {
     return make_proto(control);
   }
