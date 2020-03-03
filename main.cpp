@@ -19,10 +19,9 @@ int main() {
   regist_rawtcp_handler(
       [](char *data_ptr, std::size_t size, uint64 session_id) {
         std::cout.write(data_ptr, size);
-        std::cout << std::endl;
       });
   g_server_mgr->create_server(tcp::endpoint(tcp::v4(), 1234),
-                              std::string("rawtcp"));
+                              std::string("control"));
   // g_session_mgr->create_session(std::string("control"),
   //                              std::string("localhost"),
   //                              std::string("12345"));

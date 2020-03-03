@@ -12,7 +12,7 @@ struct tcp_echo : public tcp_proto {
   }
   virtual void write_done(std::size_t size) { write_buffer = ""; }
   virtual bool has_data_to_write() { return write_buffer.size() > 0; }
-  virtual void write(std::string &msg) { write_buffer = msg; }
+  virtual void write(const std::string &msg) { write_buffer = msg; }
 
 private:
   char read_buffer[512];
@@ -39,7 +39,7 @@ struct tcp_rawtcp : public tcp_proto {
       write_buffer = write_msg_queue.front();
   }
   virtual bool has_data_to_write() { return write_buffer.size() > 0; }
-  virtual void write(std::string &msg) {
+  virtual void write(const std::string &msg) {
     if (write_msg_queue.size() <= 0)
       write_buffer = msg;
     write_msg_queue.push_back(msg);
@@ -56,7 +56,7 @@ messge_handler controlhandler = nullptr;
 void regist_contol_handler(messge_handler handler) { controlhandler = handler; }
 
 extern "C" {
-__declspec(dllexport) void c_regiest_control_handler(messge_handler handler) {
+void c_regiest_control_handler(messge_handler handler) {
   controlhandler = handler;
 }
 }
@@ -98,12 +98,13 @@ struct tcp_control : public tcp_proto {
     }
   }
   virtual bool has_data_to_write() { return write_buffer_list.size() > 0; }
-  virtual void write(std::string &msg) {
+  virtual void write(const std::string &msg) {
     std::stringstream ss;
+    auto msg_cache = msg;
     auto size = msg.size();
     if (size > max_body_length) {
       size = max_body_length;
-      msg = msg.substr(0, max_body_length);
+      msg_cache = msg.substr(0, max_body_length);
     }
     ss << size;
     auto size_length = ss.str().size();
@@ -111,7 +112,7 @@ struct tcp_control : public tcp_proto {
     for (size_t i = 0; i < head_length - size_length; i++) {
       ss << "0";
     }
-    ss << size << msg;
+    ss << size << msg_cache;
 
     if (write_buffer.size() <= 0) {
       write_buffer = ss.str();
@@ -142,7 +143,7 @@ private:
 
 #define make_proto(name) std ::make_unique<tcp_##name>()
 
-std::unique_ptr<tcp_proto> create_proto(std::string &proto_name) {
+std::unique_ptr<tcp_proto> create_proto(const std::string &proto_name) {
   if (proto_name == "echo") {
     return make_proto(echo);
   } else if (proto_name == "rawtcp") {
@@ -150,4 +151,5 @@ std::unique_ptr<tcp_proto> create_proto(std::string &proto_name) {
   } else if (proto_name == "control") {
     return make_proto(control);
   }
+  return nullptr;
 }

@@ -7,7 +7,7 @@ public:
   server_mgr(io_context &ioc);
   ~server_mgr();
 
-  void create_server(tcp::endpoint endpoint, std::string &proto_name);
+  void create_server(tcp::endpoint endpoint, const std::string &proto_name);
   void destroy_server(uint64 server_id);
 
 private:

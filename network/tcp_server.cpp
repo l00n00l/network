@@ -4,12 +4,12 @@
 struct tcp_server::impl {
   tcp::acceptor acceptor;
   std::string proto_name;
-  impl(io_context &ioc, tcp::endpoint &endpoint, std::string &proto_name)
+  impl(io_context &ioc, tcp::endpoint &endpoint, const std::string &proto_name)
       : acceptor(ioc, endpoint), proto_name(proto_name) {}
 };
 
 tcp_server::tcp_server(io_context &ioc, tcp::endpoint endpoint,
-                       std::string &proto_name) {
+                       const std::string &proto_name) {
   impl_ptr = new impl(ioc, endpoint, proto_name);
   _do_accept();
 }

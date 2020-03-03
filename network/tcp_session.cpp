@@ -12,14 +12,14 @@ struct tcp_session::impl {
   bool reconnecting;
   steady_timer reconnect_timer;
   tcp_resolve_result endpoints;
-  impl(uint64 id, tcp::socket &socket, std::string &proto_name)
+  impl(uint64 id, tcp::socket &socket, const std::string &proto_name)
       : id(id), socket(std::move(socket)), strand(socket.get_executor()),
         valid(false), writing(false), reconnect_timer(socket.get_executor()),
         reconnecting(false) {
     proto_ptr = create_proto(proto_name);
   }
 
-  impl(uint64 id, io_context &ioc, std::string &proto_name)
+  impl(uint64 id, io_context &ioc, const std::string &proto_name)
       : id(id), socket(ioc), strand(socket.get_executor()), valid(false),
         writing(false), reconnect_timer(socket.get_executor()),
         reconnecting(false) {
@@ -28,13 +28,14 @@ struct tcp_session::impl {
 };
 
 tcp_session::tcp_session(uint64 id, tcp::socket &socket,
-                         std::string &proto_name) {
+                         const std::string &proto_name) {
   impl_ptr = new impl(id, socket, proto_name);
   impl_ptr->valid = true;
   _do_read();
 }
 
-tcp_session::tcp_session(uint64 id, io_context &ioc, std::string &proto_name,
+tcp_session::tcp_session(uint64 id, io_context &ioc,
+                         const std::string &proto_name,
                          tcp_resolve_result endpoints) {
   impl_ptr = new impl(id, ioc, proto_name);
   impl_ptr->endpoints = endpoints;
@@ -47,7 +48,7 @@ tcp_session::~tcp_session() { delete impl_ptr; }
 
 bool tcp_session::valid() { return impl_ptr->valid; }
 
-void tcp_session::send(std::string &msg) {
+void tcp_session::send(const std::string &msg) {
   bind_executor(impl_ptr->strand, [this, &msg] {
     impl_ptr->proto_ptr->write(msg);
     if (impl_ptr->writing == false) {

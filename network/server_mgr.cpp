@@ -20,7 +20,7 @@ server_mgr::server_mgr(io_context &ioc) { impl_ptr = new impl(ioc); }
 server_mgr::~server_mgr() { delete impl_ptr; }
 
 void server_mgr::create_server(tcp::endpoint endpoint,
-                               std::string &proto_name) {
+                               const std::string &proto_name) {
   bind_executor(impl_ptr->strand, [this, &endpoint, &proto_name] {
     auto new_id = impl_ptr->id_gen.gen();
     auto new_server =

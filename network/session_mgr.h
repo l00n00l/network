@@ -7,13 +7,13 @@ public:
   session_mgr(io_context &ioc);
   ~session_mgr();
 
-  uint64 create_session(tcp::socket &socket, std::string &proto_name);
-  uint64 create_session(std::string &proto_name, std::string &host,
-                        std::string &port);
+  uint64 create_session(tcp::socket &socket, const std::string &proto_name);
+  uint64 create_session(const std::string &proto_name, const std::string &host,
+                        const std::string &port);
   void remove_session(uint64 id);
 
   bool session_valid(uint64 session_id);
-  void send_msg(uint64 id, std::string &msg);
+  void send_msg(uint64 id, const std::string &msg);
 
 private:
   struct impl;

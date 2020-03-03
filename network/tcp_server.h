@@ -4,7 +4,8 @@
 
 class tcp_server {
 public:
-  tcp_server(io_context &ioc, tcp::endpoint endpoint, std::string &proto_name);
+  tcp_server(io_context &ioc, tcp::endpoint endpoint,
+             const std::string &proto_name);
   ~tcp_server();
 
 private:

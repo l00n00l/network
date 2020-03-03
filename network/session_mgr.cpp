@@ -20,7 +20,7 @@ session_mgr::session_mgr(io_context &ioc) { impl_ptr = new impl(ioc); }
 session_mgr::~session_mgr() { delete impl_ptr; }
 
 uint64 session_mgr::create_session(tcp::socket &socket,
-                                   std::string &proto_name) {
+                                   const std::string &proto_name) {
   auto ret = bind_executor(impl_ptr->strand, [this, &socket, &proto_name] {
     auto new_id = impl_ptr->id_gen.gen();
     auto new_session =
@@ -31,8 +31,9 @@ uint64 session_mgr::create_session(tcp::socket &socket,
   return ret;
 }
 
-uint64 session_mgr::create_session(std::string &proto_name, std::string &host,
-                                   std::string &port) {
+uint64 session_mgr::create_session(const std::string &proto_name,
+                                   const std::string &host,
+                                   const std::string &port) {
   auto ret = bind_executor(impl_ptr->strand, [this, &host, &port, &proto_name] {
     tcp::resolver resolver(impl_ptr->strand);
     auto endpoints = resolver.resolve(host, port);
@@ -65,7 +66,7 @@ bool session_mgr::session_valid(uint64 session_id) {
   })();
   return ret;
 }
-void session_mgr::send_msg(uint64 id, std::string &msg) {
+void session_mgr::send_msg(uint64 id, const std::string &msg) {
   bind_executor(impl_ptr->strand, [this, &id, &msg] {
     auto iter = impl_ptr->tcp_sessions.find(id);
     if (iter == impl_ptr->tcp_sessions.end()) {
