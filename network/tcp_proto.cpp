@@ -131,7 +131,7 @@ private:
   }
 
 private:
-  enum { head_length = 4, max_body_length = 512 };
+  enum { head_length = 4, max_body_length = 1024 };
   char read_buffer[head_length + max_body_length + 1];
   bool reading_header;
   std::size_t read_size;
