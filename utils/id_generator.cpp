@@ -65,13 +65,15 @@ void id_generator::recycle(uint64 value) {
 
   // 检测前一位
   if (itr != impl_ptr->recycled_ids.begin() && value - *--itr == 1) {
-    left = *--itr;
+    left = *itr;
+    ++itr;
   }
 
   // 检测后一位
   if (itr != impl_ptr->recycled_ids.end() &&
-      ++itr != impl_ptr->recycled_ids.end() && *++itr - value == 1) {
-    right = *++itr;
+      ++itr != impl_ptr->recycled_ids.end() && *itr - value == 1) {
+    right = *itr;
+    --itr;
   }
 
   if (left != right) {
