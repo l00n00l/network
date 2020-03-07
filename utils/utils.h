@@ -5,17 +5,23 @@
 #include <boost/multiprecision/cpp_bin_float.hpp>
 #include <boost/multiprecision/cpp_complex.hpp>
 #include <boost/multiprecision/cpp_int.hpp>
+#include <boost/regex.hpp>
 #include <cstdint>
 #include <string>
 
+using boost::regex;
+
 using boost::asio::async_connect;
 using boost::asio::async_read;
+using boost::asio::async_read_at;
+using boost::asio::async_read_until;
 using boost::asio::async_write;
 using boost::asio::bind_executor;
 using boost::asio::buffer;
 using boost::asio::dynamic_buffer;
 using boost::asio::io_context;
 using boost::asio::steady_timer;
+using boost::asio::streambuf;
 using boost::asio::use_future;
 using boost::asio::ip::address;
 using boost::asio::ip::tcp;

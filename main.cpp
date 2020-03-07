@@ -1,10 +1,11 @@
+#include "cfg.h"
 #include "network/server_mgr.h"
 #include "network/session_mgr.h"
 #include "network/tcp_proto.h"
 #include <list>
 #include <thread>
-
 int main() {
+  g_config.init("config.json");
   io_context ioc;
   boost::asio::signal_set signals(ioc, SIGINT, SIGTERM);
   signals.async_wait([&ioc](auto, auto) { ioc.stop(); });
@@ -20,8 +21,8 @@ int main() {
       [](char *data_ptr, std::size_t size, uint64 session_id) {
         std::cout.write(data_ptr, size);
       });
-  g_server_mgr->create_server(tcp::endpoint(tcp::v4(), 1234),
-                              std::string("control"));
+  g_server_mgr->create_server(tcp::endpoint(tcp::v4(), g_control_port),
+                              "control");
   // g_session_mgr->create_session(std::string("control"),
   //                              std::string("localhost"),
   //                              std::string("12345"));
