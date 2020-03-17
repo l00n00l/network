@@ -1,0 +1,16 @@
+{
+  "server": [
+    {
+      "read_some": "([\\s\\S]*)",
+      "vars": [ "data" ],
+      "next_condition": {}
+    }
+  ],
+  "client": [
+    {
+      "read_some": "([\\s\\S]*)",
+      "vars": [ "data" ],
+      "next_condition": {}
+    }
+  ]
+}

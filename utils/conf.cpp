@@ -3,7 +3,6 @@
 #include "conf.h"
 #include "json.h"
 #include <atomic>
-#include <filesystem>
 namespace fsys = boost::filesystem;
 #define conf_get(target_type)                                                  \
   auto ret = default_value;                                                    \

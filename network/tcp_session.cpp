@@ -16,14 +16,14 @@ struct tcp_session::impl {
       : id(id), socket(std::move(socket)), strand(socket.get_executor()),
         valid(false), writing(false), reconnect_timer(socket.get_executor()),
         reconnecting(false) {
-    proto_ptr = create_proto(proto_name);
+    proto_ptr = create_proto(proto_name, "server");
   }
 
   impl(uint64 id, io_context &ioc, const std::string &proto_name)
       : id(id), socket(ioc), strand(socket.get_executor()), valid(false),
         writing(false), reconnect_timer(socket.get_executor()),
         reconnecting(false) {
-    proto_ptr = create_proto(proto_name);
+    proto_ptr = create_proto(proto_name, "client");
   }
 };
 
@@ -64,9 +64,66 @@ void tcp_session::_do_read() {
     return;
   }
 
+  switch (impl_ptr->proto_ptr->read_type()) {
+  case 0: {
+    _do_read_some();
+    break;
+  }
+  case 1: {
+    _do_read_by_size();
+    break;
+  }
+  case 2: {
+    _do_read_until();
+    break;
+  }
+  default:
+    _do_disconnect();
+    break;
+  }
+}
+
+void tcp_session::_do_read_some() {
   impl_ptr->socket.async_read_some(
       buffer(impl_ptr->proto_ptr->read_buffer_ptr(),
              impl_ptr->proto_ptr->read_buffer_size()),
+      bind_executor(impl_ptr->strand, [this](error_code ec, std::size_t size) {
+        if (ec) {
+          if (impl_ptr->endpoints.size() <= 0) {
+            _do_disconnect();
+          } else {
+            _set_reconnect_timer();
+          }
+          return;
+        }
+        impl_ptr->proto_ptr->read_done(size, impl_ptr->id);
+        _do_read();
+      }));
+}
+
+void tcp_session::_do_read_by_size() {
+  async_read(
+      impl_ptr->socket,
+      dynamic_buffer(impl_ptr->proto_ptr->dbuffer(),
+                     impl_ptr->proto_ptr->read_buffer_size()),
+      bind_executor(impl_ptr->strand, [this](error_code ec, std::size_t size) {
+        if (ec) {
+          if (impl_ptr->endpoints.size() <= 0) {
+            _do_disconnect();
+          } else {
+            _set_reconnect_timer();
+          }
+          return;
+        }
+        impl_ptr->proto_ptr->read_done(size, impl_ptr->id);
+        _do_read();
+      }));
+}
+
+void tcp_session::_do_read_until() {
+  async_read_until(
+      impl_ptr->socket, impl_ptr->proto_ptr->sbuffer(),
+      impl_ptr->proto_ptr->until_regex(),
       bind_executor(impl_ptr->strand, [this](error_code ec, std::size_t size) {
         if (ec) {
           if (impl_ptr->endpoints.size() <= 0) {
@@ -126,7 +183,7 @@ void tcp_session::_do_connect() {
           return;
         }
         impl_ptr->valid = true;
-        _do_read();
+        _do_read_some();
       }));
 }
 

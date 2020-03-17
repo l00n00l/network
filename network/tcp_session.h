@@ -13,6 +13,9 @@ public:
 
 private:
   void _do_read();
+  void _do_read_some();
+  void _do_read_by_size();
+  void _do_read_until();
   void _do_write();
   void _do_disconnect();
   void _do_connect();

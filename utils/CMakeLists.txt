@@ -1,6 +1,6 @@
 project(utils)
 cmake_minimum_required(VERSION 3.11)
-find_package(Boost 1.72.0 COMPONENTS thread filesystem regex)
+find_package(Boost 1.72.0 COMPONENTS thread filesystem "regex" locale)
 
 if(Boost_FOUND)
 	set(Boost_USE_MULTITHREADED ON)
