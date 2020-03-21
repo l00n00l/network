@@ -16,20 +16,24 @@ struct tcp_session::impl {
       : id(id), socket(std::move(socket)), strand(socket.get_executor()),
         valid(false), writing(false), reconnect_timer(socket.get_executor()),
         reconnecting(false) {
-    proto_ptr = create_proto(proto_name, "server");
+    proto_ptr = create_proto_server(proto_name);
   }
 
   impl(uint64 id, io_context &ioc, const std::string &proto_name)
       : id(id), socket(ioc), strand(socket.get_executor()), valid(false),
         writing(false), reconnect_timer(socket.get_executor()),
         reconnecting(false) {
-    proto_ptr = create_proto(proto_name, "client");
+    proto_ptr = create_proto_client(proto_name);
   }
 };
 
 tcp_session::tcp_session(uint64 id, tcp::socket &socket,
                          const std::string &proto_name) {
   impl_ptr = new impl(id, socket, proto_name);
+  if (!impl_ptr) {
+    lserr << "impl_ptr == null" >> __FUNCTION__;
+    return;
+  }
   impl_ptr->valid = true;
   _do_read();
 }
@@ -38,13 +42,21 @@ tcp_session::tcp_session(uint64 id, io_context &ioc,
                          const std::string &proto_name,
                          tcp_resolve_result endpoints) {
   impl_ptr = new impl(id, ioc, proto_name);
+  if (!impl_ptr) {
+    lserr << "impl_ptr == null" >> __FUNCTION__;
+    return;
+  }
+
   impl_ptr->endpoints = endpoints;
   if (impl_ptr->endpoints.size() > 0) {
     _do_connect();
   }
 }
 
-tcp_session::~tcp_session() { delete impl_ptr; }
+tcp_session::~tcp_session() {
+  if (impl_ptr)
+    delete impl_ptr;
+}
 
 bool tcp_session::valid() { return impl_ptr->valid; }
 
@@ -64,16 +76,16 @@ void tcp_session::_do_read() {
     return;
   }
 
-  switch (impl_ptr->proto_ptr->read_type()) {
-  case 0: {
+  switch (impl_ptr->proto_ptr->cur_read_type()) {
+  case read_some: {
     _do_read_some();
     break;
   }
-  case 1: {
+  case read_size: {
     _do_read_by_size();
     break;
   }
-  case 2: {
+  case read_until: {
     _do_read_until();
     break;
   }

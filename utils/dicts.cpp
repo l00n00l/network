@@ -13,7 +13,12 @@ struct dicts::impl {
   impl() { flag.clear(); }
 };
 
-dicts::dicts() : impl_ptr(new impl) {}
+dicts::dicts() : impl_ptr(new impl) {
+  if (!impl_ptr) {
+    lserr << "impl_ptr == null" >> __FUNCTION__;
+    return;
+  }
+}
 
 dicts::~dicts() {
   if (impl_ptr)

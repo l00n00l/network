@@ -1,10 +1,13 @@
 #pragma once
 #include "../utils/utils.h"
 
+enum side_index { side_server, side_client };
+enum read_type { none, read_some, read_until, read_size, read_var_size };
+
 struct tcp_proto {
-  tcp_proto(const std::string &proto_name, const std::string &side);
+  tcp_proto(const std::string &proto_name, side_index side);
   ~tcp_proto();
-  uint8 read_type();
+  read_type cur_read_type();
   char *read_buffer_ptr();
   std::string &dbuffer();
   asio_stream_buf &sbuffer();
@@ -23,8 +26,9 @@ private:
   impl *impl_ptr;
 };
 
-std::unique_ptr<tcp_proto> create_proto(const std::string &proto_name,
-                                        const std::string &server_or_client);
+std::unique_ptr<tcp_proto> create_proto_server(const std::string &proto_name);
+std::unique_ptr<tcp_proto> create_proto_client(const std::string &proto_name);
+
 bool load_protos(const std::string &path);
 typedef void (*message_handler_type)(uint64 session_id, uint64 data_id,
                                      const char *proto_name);

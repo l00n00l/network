@@ -16,6 +16,10 @@ struct id_generator::id_generator_impl {
 
 id_generator::id_generator() {
   impl_ptr = std::make_unique<id_generator_impl>();
+  if (!impl_ptr) {
+    lserr << "impl_ptr == null" >> __FUNCTION__;
+    return;
+  }
 }
 
 id_generator::~id_generator() {}

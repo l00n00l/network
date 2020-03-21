@@ -15,7 +15,13 @@ struct server_mgr::impl {
   impl(io_context &ioc) : ioc(ioc), strand(ioc) {}
 };
 
-server_mgr::server_mgr(io_context &ioc) { impl_ptr = new impl(ioc); }
+server_mgr::server_mgr(io_context &ioc) {
+  impl_ptr = new impl(ioc);
+  if (!impl_ptr) {
+    lserr << "impl_ptr == null" >> __FUNCTION__;
+    return;
+  }
+}
 
 server_mgr::~server_mgr() { delete impl_ptr; }
 

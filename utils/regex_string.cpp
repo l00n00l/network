@@ -568,7 +568,13 @@ struct regstring::impl {
   std::stringstream ss;
 };
 
-regstring::regstring() { impl_ptr = new impl; }
+regstring::regstring() {
+  impl_ptr = new impl;
+  if (!impl_ptr) {
+    lserr << "impl_ptr == null" >> __FUNCTION__;
+    return;
+  }
+}
 
 regstring::~regstring() {
   if (impl_ptr) {
