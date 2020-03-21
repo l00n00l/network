@@ -2,7 +2,7 @@
   "server": [
     {
       "read_until": "\r\n",
-      "complie_regex": "(?<action>\\w+)\\s{1}(?<url>\\S+)\\s{1}(?<version>\\S+)",
+      "complie_regex": "(?<action>\\w+)\\s{1}(?<url>\\S+)\\s{1}(?<version>\\S+)\r\n",
       "next_condition": {}
     },
     {
@@ -19,12 +19,12 @@
   "client": [
     {
       "read_until": "\r\n",
-      "complie_regex": "(?<version>\\w+)\\s(?<status_code>\\S+)\\s(?<status>\\S+)",
+      "complie_regex": "(?<version>\\w+)\\s(?<status_code>\\S+)\\s(?<status>\\S+)\r\n",
       "next_condition": {}
     },
     {
       "read_until": "\r\n",
-      "complie_regex": "(?<key_0>.*):{0,1}(?<value_0>.*)",
+      "complie_regex": "(?<key_0>.*):{0,1}(?<value_0>.*)\r\n",
       "next_condition": { "match": "^\r\n$" }
     },
     {

@@ -44,11 +44,24 @@ int main() {
   // std::cout << ret << std::endl;
   // boost::any v = uint16(2);
   // v = "fsdf";
-  std::string r("(?<action>\\w{10})\\s{1}(?<url>\\S+)\\s{1}(?<version>\\S+)");
-  auto ret = generate_regex_string(r.c_str(), r.size());
-  for (auto &i : ret) {
-    std::cout << i.name << ':' << i.data << std::endl;
-  }
+  set_error_log_func([](const char *data_ptr, std::size_t size) {
+    std::cerr << from_utf(u8"[´íÎó]", "gb2312")
+              << from_utf(std::string(data_ptr, size), "gb2312") << std::endl;
+  });
+  set_info_log_func([](const char *data_ptr, std::size_t size) {
+    std::cout << from_utf(u8"[ĞÅÏ¢]", "gb2312")
+              << from_utf(std::string(data_ptr, size), "gb2312") << std::endl;
+  });
+  set_debug_log_func([](const char *data_ptr, std::size_t size) {
+    std::cout << from_utf(u8"[µ÷ÊÔ]", "gb2312")
+              << from_utf(std::string(data_ptr, size), "gb2312") << std::endl;
+  });
+
+  regstring s;
+  s.parse_regex("(?<key_0>.*):{0,1}(?<value_0>.*)\r\n");
+  s.set("key_0", "hahaha");
+  s.set("value_0", "HTTP/1.1");
+  std::cout << s.str();
   return 0;
 }
 
