@@ -568,13 +568,7 @@ struct regstring::impl {
   std::stringstream ss;
 };
 
-regstring::regstring() {
-  impl_ptr = new impl;
-  if (!impl_ptr) {
-    lserr << "impl_ptr == null" >> __FUNCTION__;
-    return;
-  }
-}
+regstring::regstring() { impl_ptr = new impl; }
 
 regstring::~regstring() {
   if (impl_ptr) {
@@ -634,4 +628,14 @@ std::string regstring::str() {
     impl_ptr->ss << i.data;
   }
   return impl_ptr->ss.str();
+}
+
+std::list<std::string> regstring::names() {
+  std::list<std::string> ret;
+  for (auto &i : impl_ptr->s) {
+    if (!i.name.empty()) {
+      ret.push_back(i.name);
+    }
+  }
+  return ret;
 }

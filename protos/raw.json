@@ -1,13 +1,13 @@
 {
   "server": [
     {
-      "complie_regex": "",
+      "complie_regex": "(?<data>[\\s\\S]*)",
       "next_condition": ""
     }
   ],
   "client": [
     {
-      "complie_regex": "",
+      "complie_regex": "(?<data>[\\s\\S]*)",
       "next_condition": ""
     }
   ]

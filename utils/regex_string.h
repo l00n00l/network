@@ -42,6 +42,8 @@ public:
   std::size_t size();
   std::string str();
 
+  std::list<std::string> names();
+
 private:
   struct impl;
   impl *impl_ptr;

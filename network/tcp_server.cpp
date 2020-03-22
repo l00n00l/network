@@ -11,10 +11,6 @@ struct tcp_server::impl {
 tcp_server::tcp_server(io_context &ioc, tcp::endpoint endpoint,
                        const std::string &proto_name) {
   impl_ptr = new impl(ioc, endpoint, proto_name);
-  if (!impl_ptr) {
-    lserr << "impl_ptr == null" >> __FUNCTION__;
-    return;
-  }
   _do_accept();
 }
 

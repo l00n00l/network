@@ -13,12 +13,7 @@ struct dicts::impl {
   impl() { flag.clear(); }
 };
 
-dicts::dicts() : impl_ptr(new impl) {
-  if (!impl_ptr) {
-    lserr << "impl_ptr == null" >> __FUNCTION__;
-    return;
-  }
-}
+dicts::dicts() : impl_ptr(new impl) {}
 
 dicts::~dicts() {
   if (impl_ptr)
@@ -29,8 +24,6 @@ uint64 dicts::gen() { return impl_ptr->id_gen.gen(); }
 
 void dicts::remove(uint64 id) {
   atomic_flag_acquire(impl_ptr->flag);
-  if (impl_ptr->dict_map.find(id) == impl_ptr->dict_map.end())
-    return;
   impl_ptr->dict_map.erase(id);
   atomic_flag_release(impl_ptr->flag);
   impl_ptr->id_gen.recycle(id);
@@ -39,9 +32,8 @@ void dicts::remove(uint64 id) {
 void dicts::remove_value(uint64 id, const std::string &key) {
   atomic_flag_acquire(impl_ptr->flag);
   auto iter = impl_ptr->dict_map.find(id);
-  if (iter == impl_ptr->dict_map.end())
-    return;
-  iter->second.erase(key);
+  if (iter != impl_ptr->dict_map.end())
+    iter->second.erase(key);
   atomic_flag_release(impl_ptr->flag);
 }
 #define is_type(t, id, key)                                                    \
@@ -58,17 +50,16 @@ void dicts::remove_value(uint64 id, const std::string &key) {
       ret = typeid(t) == iter2->second.type();                                 \
     }                                                                          \
   }                                                                            \
-  atomic_flag_acquire(impl_ptr->flag);                                         \
+  atomic_flag_release(impl_ptr->flag);                                         \
   return ret;
 
 bool dicts::has_dict(uint64 id) {
   auto ret = true;
   atomic_flag_acquire(impl_ptr->flag);
   auto iter = impl_ptr->dict_map.find(id);
-  if (iter == impl_ptr->dict_map.end()) {
+  if (iter == impl_ptr->dict_map.end())
     ret = false;
-  }
-  atomic_flag_acquire(impl_ptr->flag);
+  atomic_flag_release(impl_ptr->flag);
   return ret;
 }
 
@@ -84,7 +75,7 @@ bool dicts::has_value(uint64 id, const std::string &key) {
       ret = false;
     }
   }
-  atomic_flag_acquire(impl_ptr->flag);
+  atomic_flag_release(impl_ptr->flag);
   return ret;
 }
 
@@ -142,7 +133,7 @@ bool dicts::is_string(uint64 id, const std::string &key) {
       ret = boost::any_cast<std::string>(&(iter2->second));
     }
   }
-  atomic_flag_acquire(impl_ptr->flag);
+  atomic_flag_release(impl_ptr->flag);
   return ret;
 }
 
@@ -165,7 +156,7 @@ bool dicts::is_char_ptr(uint64 id, const std::string &key) {
       }
     }
   }
-  atomic_flag_acquire(impl_ptr->flag);
+  atomic_flag_release(impl_ptr->flag);
   return ret;
 }
 #define get_value(t, id, key)                                                  \
@@ -174,7 +165,7 @@ bool dicts::is_char_ptr(uint64 id, const std::string &key) {
   auto iter = impl_ptr->dict_map.find(id);                                     \
   if (iter != impl_ptr->dict_map.end()) {                                      \
     auto iter2 = iter->second.find(key);                                       \
-    if (iter2 == iter->second.end()) {                                         \
+    if (iter2 != iter->second.end()) {                                         \
       try {                                                                    \
         ret = *boost::any_cast<t>(&(iter2->second));                           \
       } catch (const boost::bad_any_cast &) {                                  \
@@ -183,7 +174,7 @@ bool dicts::is_char_ptr(uint64 id, const std::string &key) {
       }                                                                        \
     }                                                                          \
   }                                                                            \
-  atomic_flag_acquire(impl_ptr->flag);                                         \
+  atomic_flag_release(impl_ptr->flag);                                         \
   return ret;
 
 int8 dicts::get_int8(uint64 id,
@@ -222,7 +213,7 @@ std::string dicts::get_string(uint64 id, const std::string &key) {
   auto iter = impl_ptr->dict_map.find(id);
   if (iter != impl_ptr->dict_map.end()) {
     auto iter2 = iter->second.find(key);
-    if (iter2 == iter->second.end()) {
+    if (iter2 != iter->second.end()) {
       try {
         ret = *boost::any_cast<std::string>(&(iter2->second));
       } catch (const boost::bad_any_cast &) {
@@ -230,7 +221,7 @@ std::string dicts::get_string(uint64 id, const std::string &key) {
       }
     }
   }
-  atomic_flag_acquire(impl_ptr->flag);
+  atomic_flag_release(impl_ptr->flag);
   return ret;
 }
 
@@ -250,57 +241,59 @@ void dicts::build_c_str(uint64 id, const std::string &key,
       }
     }
   }
+  atomic_flag_release(impl_ptr->flag);
+}
+template <typename T, typename D>
+inline void set_value(D *impl_ptr, uint64 id, const std::string &key,
+                      T const &value) {
   atomic_flag_acquire(impl_ptr->flag);
+  impl_ptr->dict_map[id][key] = value;
+  atomic_flag_release(impl_ptr->flag);
 }
 
-#define set_value(id, key, value)                                              \
-  atomic_flag_acquire(impl_ptr->flag);                                         \
-  impl_ptr->dict_map[id][key] = value;                                         \
-  atomic_flag_acquire(impl_ptr->flag);
-
 void dicts::set_int8(uint64 id, const std::string &key, int8 const &value) {
-  set_value(id, key, value)
+  set_value(impl_ptr, id, key, value);
 }
 
 void dicts::set_int16(uint64 id, const std::string &key, int16 const &value) {
-  set_value(id, key, value)
+  set_value(impl_ptr, id, key, value);
 }
 
 void dicts::set_int32(uint64 id, const std::string &key, int32 const &value) {
-  set_value(id, key, value)
+  set_value(impl_ptr, id, key, value);
 }
 
 void dicts::set_int64(uint64 id, const std::string &key, int64 const &value) {
-  set_value(id, key, value)
+  set_value(impl_ptr, id, key, value);
 }
 
 void dicts::set_uint8(uint64 id, const std::string &key, uint8 const &value) {
-  set_value(id, key, value)
+  set_value(impl_ptr, id, key, value);
 }
 
 void dicts::set_uint16(uint64 id, const std::string &key, uint16 const &value) {
-  set_value(id, key, value)
+  set_value(impl_ptr, id, key, value);
 }
 
 void dicts::set_uint32(uint64 id, const std::string &key, uint32 const &value) {
-  set_value(id, key, value)
+  set_value(impl_ptr, id, key, value);
 }
 
 void dicts::set_uint64(uint64 id, const std::string &key, uint64 const &value) {
-  set_value(id, key, value)
+  set_value(impl_ptr, id, key, value);
 }
 
 void dicts::set_float32(uint64 id, const std::string &key,
                         float32 const &value) {
-  set_value(id, key, value)
+  set_value(impl_ptr, id, key, value);
 }
 
 void dicts::set_float64(uint64 id, const std::string &key,
                         float64 const &value) {
-  set_value(id, key, value)
+  set_value(impl_ptr, id, key, value);
 }
 
 void dicts::set_string(uint64 id, const std::string &key,
                        std::string const &value) {
-  set_value(id, key, value)
+  set_value(impl_ptr, id, key, value);
 }

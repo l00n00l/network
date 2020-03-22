@@ -28,13 +28,7 @@ struct conf::impl {
   impl() { wflag.clear(); }
 };
 
-conf::conf() {
-  impl_ptr = new impl;
-  if (!impl_ptr) {
-    lserr << "impl_ptr == null" >> __FUNCTION__;
-    return;
-  }
-}
+conf::conf() { impl_ptr = new impl; }
 
 conf::~conf() {
   if (impl_ptr)

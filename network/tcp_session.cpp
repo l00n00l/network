@@ -30,10 +30,6 @@ struct tcp_session::impl {
 tcp_session::tcp_session(uint64 id, tcp::socket &socket,
                          const std::string &proto_name) {
   impl_ptr = new impl(id, socket, proto_name);
-  if (!impl_ptr) {
-    lserr << "impl_ptr == null" >> __FUNCTION__;
-    return;
-  }
   impl_ptr->valid = true;
   _do_read();
 }
@@ -42,11 +38,6 @@ tcp_session::tcp_session(uint64 id, io_context &ioc,
                          const std::string &proto_name,
                          tcp_resolve_result endpoints) {
   impl_ptr = new impl(id, ioc, proto_name);
-  if (!impl_ptr) {
-    lserr << "impl_ptr == null" >> __FUNCTION__;
-    return;
-  }
-
   impl_ptr->endpoints = endpoints;
   if (impl_ptr->endpoints.size() > 0) {
     _do_connect();
@@ -81,6 +72,7 @@ void tcp_session::_do_read() {
     _do_read_some();
     break;
   }
+  case read_var_size:
   case read_size: {
     _do_read_by_size();
     break;

@@ -4,20 +4,17 @@
 #include <boost/any.hpp>
 #include <iostream>
 int main() {
-  // regex r;
+  regex r;
   // r.set_expression("(?<=(?:bbb))(?<hahaha>.*)");
-  // auto s = std::string("sdfjkalsjbbb234234    fjksdljf");
-  // boost::match_results<std::string::const_iterator> m;
+  auto s = std::string("sdfjkalsjbbb234234    fjksdljf");
+  boost::match_results<std::string::const_iterator> m;
   // if (regex_search(s, m, r)) {
   //}
   // std::string s;
 
-  // r.set_expression("(\\w+$)");
-  // if (boost::regex_search(s, m, r)) {
-  //  std::cout << m[0].str() << std::endl;
-  //  std::cout << m[1].str() << std::endl;
-  //  std::cout << m.size() << std::endl;
-  //}
+  r.set_expression("(?<ttt>\\d+)");
+  if (boost::regex_search(s, m, r)) {
+  }
   // r.set_expression("\\w+\\s*\\w+");
   // if (boost::regex_match(s, r)) {
   //  std::cout << "yes" << std::endl;
@@ -44,24 +41,24 @@ int main() {
   // std::cout << ret << std::endl;
   // boost::any v = uint16(2);
   // v = "fsdf";
-  set_error_log_func([](const char *data_ptr, std::size_t size) {
-    std::cerr << from_utf(u8"[错误]", "gb2312")
-              << from_utf(std::string(data_ptr, size), "gb2312") << std::endl;
-  });
-  set_info_log_func([](const char *data_ptr, std::size_t size) {
-    std::cout << from_utf(u8"[信息]", "gb2312")
-              << from_utf(std::string(data_ptr, size), "gb2312") << std::endl;
-  });
-  set_debug_log_func([](const char *data_ptr, std::size_t size) {
-    std::cout << from_utf(u8"[调试]", "gb2312")
-              << from_utf(std::string(data_ptr, size), "gb2312") << std::endl;
-  });
+  /* set_error_log_func([](const char *data_ptr, std::size_t size) {
+     std::cerr << from_utf(u8"[错误]", "gb2312")
+               << from_utf(std::string(data_ptr, size), "gb2312") << std::endl;
+   });
+   set_info_log_func([](const char *data_ptr, std::size_t size) {
+     std::cout << from_utf(u8"[信息]", "gb2312")
+               << from_utf(std::string(data_ptr, size), "gb2312") << std::endl;
+   });
+   set_debug_log_func([](const char *data_ptr, std::size_t size) {
+     std::cout << from_utf(u8"[调试]", "gb2312")
+               << from_utf(std::string(data_ptr, size), "gb2312") << std::endl;
+   });
 
-  regstring s;
-  s.parse_regex("(?<key_0>.*):{0,1}(?<value_0>.*)\r\n");
-  s.set("key_0", "hahaha");
-  s.set("value_0", "HTTP/1.1");
-  std::cout << s.str();
+   regstring s;
+   s.parse_regex("(?<key_0>.*):{0,1}(?<value_0>.*)\r\n");
+   s.set("key_0", "hahaha");
+   s.set("value_0", "HTTP/1.1");
+   std::cout << s.str();*/
   return 0;
 }
 

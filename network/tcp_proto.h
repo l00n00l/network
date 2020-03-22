@@ -21,14 +21,15 @@ struct tcp_proto {
   void write(const std::string &msg);
 
 private:
-private:
   struct impl;
   impl *impl_ptr;
 };
+
+typedef void (*message_handler_type)(uint64 session_id, uint64 data_id,
+                                     const char *proto_name);
+void set_message_handler(message_handler_type handler);
 
 std::unique_ptr<tcp_proto> create_proto_server(const std::string &proto_name);
 std::unique_ptr<tcp_proto> create_proto_client(const std::string &proto_name);
 
 bool load_protos(const std::string &path);
-typedef void (*message_handler_type)(uint64 session_id, uint64 data_id,
-                                     const char *proto_name);

@@ -15,13 +15,7 @@ struct session_mgr::impl {
   impl(io_context &ioc) : strand(ioc) {}
 };
 
-session_mgr::session_mgr(io_context &ioc) {
-  impl_ptr = new impl(ioc);
-  if (!impl_ptr) {
-    lserr << "impl_ptr == null" >> __FUNCTION__;
-    return;
-  }
-}
+session_mgr::session_mgr(io_context &ioc) { impl_ptr = new impl(ioc); }
 
 session_mgr::~session_mgr() {
   if (impl_ptr)

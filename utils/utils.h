@@ -7,6 +7,7 @@
 #include <boost/locale.hpp>
 #include <boost/multiprecision/cpp_bin_float.hpp>
 #include <boost/multiprecision/cpp_complex.hpp>
+#include <boost/multiprecision/cpp_dec_float.hpp>
 #include <boost/multiprecision/cpp_int.hpp>
 #include <boost/regex.hpp>
 #include <boost/thread.hpp>
@@ -49,6 +50,7 @@ typedef boost::asio::strand<boost::asio::executor> exe_strand;
 #define atomic_flag_acquire(flag)                                              \
   while (flag.test_and_set(std::memory_order_acquire))                         \
   boost::this_thread::yield()
+
 #define atomic_flag_release(flag) flag.clear(std::memory_order_release)
 
 using int8 = int8_t;
@@ -59,9 +61,56 @@ using uint8 = uint8_t;
 using uint16 = uint16_t;
 using uint32 = uint32_t;
 using uint64 = uint64_t;
+using boost::multiprecision::cpp_bin_float;
 using boost::multiprecision::cpp_int;
-
+using boost::multiprecision::number;
 using float32 = float;
 using float64 = double;
-using float128 = boost::multiprecision::cpp_bin_float<128>;
-using boost::multiprecision::cpp_bin_float;
+using float128 = boost::multiprecision::cpp_bin_float_quad;
+
+inline int8 to_int8(const std::string &data) {
+  return boost::lexical_cast<int8>(data);
+}
+inline int16 to_int16(const std::string &data) {
+  return boost::lexical_cast<int16>(data);
+}
+inline int32 to_int32(const std::string &data) {
+  return boost::lexical_cast<int32>(data);
+}
+inline int64 to_int64(const std::string &data) {
+  return boost::lexical_cast<int64>(data);
+}
+inline uint8 to_uint8(const std::string &data) {
+  return boost::lexical_cast<uint8>(data);
+}
+inline uint16 to_uint16(const std::string &data) {
+  return boost::lexical_cast<uint16>(data);
+}
+inline uint32 to_uint32(const std::string &data) {
+  return boost::lexical_cast<uint32>(data);
+}
+inline uint64 to_uint64(const std::string &data) {
+  return boost::lexical_cast<uint64>(data);
+}
+inline float32 to_float32(const std::string &data) {
+  return boost::lexical_cast<float32>(data);
+}
+inline float64 to_float64(const std::string &data) {
+  return boost::lexical_cast<float64>(data);
+}
+inline float128 to_float128(const std::string &data) { return float128(data); }
+
+inline void strcpy(char *des, const char *src, std::size_t size) {
+  for (std::size_t i = 0; i < size; i++) {
+    des[i] = src[i];
+  }
+}
+
+inline std::string sbuffer_string(asio_stream_buf &buf, std::size_t size = 0) {
+  if (size == 0)
+    size = buf.size();
+  auto begin = buffers_begin(buf.data());
+  auto ret = std::string(begin, begin + size);
+  buf.consume(size);
+  return ret;
+}
