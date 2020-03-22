@@ -260,7 +260,7 @@ struct tcp_proto::impl {
   inline enum read_type cur_read_type() { return proto_data[cur_index].rtype; }
   inline read_item &read_item() { return proto_data[cur_index]; }
   inline void next() {
-    cur_index = (cur_index + (int32)1) % proto_data.size();
+    cur_index = (cur_index + 1) % proto_data.size();
     buffer_offset = 0;
     switch (cur_read_type()) {
     case read_some: {
