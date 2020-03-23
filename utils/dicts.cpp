@@ -13,6 +13,39 @@ struct dicts::impl {
   impl() { flag.clear(); }
 };
 
+struct dict_iterator::dict_iterator_impl {
+  dict_type::const_iterator iter;
+  dict_type::const_iterator iter_end;
+  std::string end_str;
+};
+
+dict_iterator::dict_iterator(uint64 id, dicts *dict_ptr) {
+  impl_ptr = new dict_iterator_impl;
+  if (dict_ptr) {
+    auto iter = dict_ptr->impl_ptr->dict_map.find(id);
+    if (iter != dict_ptr->impl_ptr->dict_map.end()) {
+      impl_ptr->iter = iter->second.begin();
+      impl_ptr->iter_end = iter->second.end();
+    }
+  }
+}
+
+dict_iterator::~dict_iterator() {
+  if (impl_ptr) {
+    delete impl_ptr;
+  }
+}
+
+const std::string dict_iterator::operator()() {
+  if (impl_ptr->iter != impl_ptr->iter_end) {
+    auto ret = impl_ptr->iter->first;
+    ++impl_ptr->iter;
+    return ret;
+  }
+
+  return impl_ptr->end_str;
+}
+
 dicts::dicts() : impl_ptr(new impl) {}
 
 dicts::~dicts() {

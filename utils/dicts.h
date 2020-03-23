@@ -1,5 +1,17 @@
 #pragma once
 #include "utils.h"
+class dicts;
+class dict_iterator {
+public:
+  dict_iterator(uint64 id, dicts *dict_ptr);
+  ~dict_iterator();
+  const std::string operator()();
+
+private:
+  struct dict_iterator_impl;
+  dict_iterator_impl *impl_ptr;
+};
+
 class dicts {
 public:
   dicts();
@@ -50,6 +62,7 @@ public:
   void set_string(uint64 id, const std::string &key, std::string const &value);
 
 private:
+  friend struct dict_iterator;
   struct impl;
   impl *impl_ptr;
 };

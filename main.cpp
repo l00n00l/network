@@ -30,10 +30,10 @@ int main() {
   set_message_handler(
       [](uint64 session_id, uint64 data_id, const char *proto_name) {
         extern dicts g_net_dicts;
-        lsdebug >> g_net_dicts.get_string(data_id, "action");
-        lsdebug >> g_net_dicts.get_string(data_id, "url");
-        lsdebug >> g_net_dicts.get_string(data_id, "version");
-        lsdebug >> g_net_dicts.get_string(data_id, "Content-Length");
+        dict_iterator itr(data_id, &g_net_dicts);
+        for (auto key = itr(); !key.empty(); key = itr()) {
+          lsdebug << key << ":" >> g_net_dicts.get_string(data_id, key);
+        }
       });
 
   io_context ioc;
