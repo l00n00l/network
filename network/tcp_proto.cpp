@@ -291,7 +291,8 @@ struct tcp_proto::impl {
         if (!var_value.empty()) {
           dbuffer_size = to_uint64(var_value);
         } else {
-          lserr << u8"协议错误!找不到变量" << read_item().arg.var_name >>
+          lserr << u8"协议错误!找不到变量:" << read_item().arg.var_name
+                << " " >>
               __FUNCTION__;
         }
 
@@ -347,29 +348,69 @@ std::size_t tcp_proto::write_buffer_size() {
   return impl_ptr->write_buffer.size();
 }
 
-inline bool compile_read_data(const std::string &data, regex &r, uint64 var_id,
-                              std::list<std::string> &names) {
+inline bool test_go_next(const std::string &data, regex &r) {
+  if (r.str().empty()) {
+    return true;
+  }
+  return regex_match(data, r);
+}
+
+// 返回是否进入下一阶段
+inline bool compile_read_data(const std::string &data, regex &r, regex &end_r,
+                              uint64 var_id, std::list<std::string> &names) {
   try {
     match_results_str mret;
     if (!regex_search(data, mret, r)) {
-      lserr << u8"协议解析错误，请检测协议解析表达式!" >> __FUNCTION__;
-      return false;
+      if (test_go_next(data, end_r)) {
+        return true;
+      }
+
+      lserr << u8"协议解析错误，请检测协议解析表达式! regex = /" << r.str()
+            << "/ data = " << data >>
+          __FUNCTION__;
+      return true;
     }
 
+    std::unordered_map<int32, std::string> key_cache;
+    std::unordered_map<int32, std::string> value_cache;
+    regex reg_key("key_(\\d+)"), reg_value("value_(\\d+)");
+    match_results_str mret_cache;
     for (auto &name : names) {
-      g_net_dicts.set_string(var_id, name, mret[name]);
+      if (regex_match(name, mret_cache, reg_key)) {
+        auto id = to_int32(mret_cache[1]);
+        auto iter = value_cache.find(id);
+        if (iter != value_cache.end()) {
+          g_net_dicts.set_string(var_id, mret[name], iter->second);
+        } else {
+          key_cache[id] = mret[name];
+        }
+      } else if (regex_match(name, mret_cache, reg_value)) {
+        auto id = to_int32(mret_cache[1]);
+        auto iter = key_cache.find(id);
+        if (iter != key_cache.end()) {
+          g_net_dicts.set_string(var_id, iter->second, mret[name]);
+        } else {
+          value_cache[id] = mret[name];
+        }
+      } else {
+        g_net_dicts.set_string(var_id, name, mret[name]);
+      }
+    }
+
+    if (test_go_next(data, end_r)) {
+      return true;
     }
   } catch (std::exception &e) {
-    lserr << __FUNCTION__ >> std::string(e.what());
-    return false;
+    lserr << __FUNCTION__ << " " >> std::string(e.what());
+    return true;
   } catch (...) {
     lserr << u8"数据解析错误!数据=" << data << u8"解析表达式为=" << r.str()
           << u8"。" >>
         __FUNCTION__;
-    return false;
+    return true;
   }
 
-  return true;
+  return false;
 }
 
 void tcp_proto::read_done(std::size_t size, uint64 session_id) {
@@ -387,17 +428,17 @@ void tcp_proto::read_done(std::size_t size, uint64 session_id) {
     impl_ptr->dbuffer.clear();
     break;
   }
-
-  auto succeed =
+  auto go_next =
       compile_read_data(data, impl_ptr->read_item().compile_regex,
+                        impl_ptr->read_item().next_condition_regex,
                         impl_ptr->net_vars_id, impl_ptr->read_item().var_names);
 
-  if (succeed) {
-    // 读取完整个协议后才执行handler
-    if (impl_ptr->cur_index == impl_ptr->proto_data.size() - 1) {
-      msg_handler(session_id, impl_ptr->net_vars_id, impl_ptr->name.c_str());
-    }
-    // 读取下一项
+  // 读取完整个协议后才执行handler
+  if (impl_ptr->cur_index == impl_ptr->proto_data.size() - 1) {
+    msg_handler(session_id, impl_ptr->net_vars_id, impl_ptr->name.c_str());
+  }
+
+  if (go_next) {
     impl_ptr->next();
   }
 }

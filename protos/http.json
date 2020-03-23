@@ -7,7 +7,7 @@
     },
     {
       "read_until": "\r\n",
-      "complie_regex": "(?<key_0>.*):{0,1}(?<value_0>.*)\r\n",
+      "complie_regex": "(?<key_0>.*?):\\s(?<value_0>.*)\r\n",
       "next_condition": "\r\n"
     },
     {
