@@ -26,7 +26,6 @@ int main() {
   if (!load_protos(g_proto_path)) {
     return EXIT_FAILURE;
   };
-
   set_message_handler(
       [](uint64 session_id, uint64 data_id, const char *proto_name) {
         extern dicts g_net_dicts;
@@ -42,26 +41,26 @@ int main() {
   g_session_mgr = std::make_shared<session_mgr>(ioc);
   g_server_mgr = std::make_shared<server_mgr>(ioc);
 
-  // g_server_mgr->create_server(tcp::endpoint(tcp::v4(), g_control_port),
-  // "http");
-  auto session_id =
-      g_session_mgr->create_session("control", "localhost", "12345");
+  g_server_mgr->create_server(tcp::endpoint(tcp::v4(), g_control_port),
+                              "control");
+  // auto session_id =
+  //    g_session_mgr->create_session("control", "localhost", "12345");
 
   auto core_count = std::thread::hardware_concurrency();
   std::list<std::thread> thread_list;
   for (size_t i = 1; i < core_count; i++) {
     thread_list.push_back(std::thread([&ioc] { ioc.run(); }));
   }
-  bool running = true;
-  thread_list.push_back(std::thread([&] {
-    while (running) {
-      std::this_thread::sleep_for(std::chrono::seconds(1));
-      g_session_mgr->send_msg(session_id, "hello");
-    }
-  }));
+  // bool running = true;
+  // thread_list.push_back(std::thread([&] {
+  //  while (running) {
+  //    std::this_thread::sleep_for(std::chrono::seconds(1));
+  //    g_session_mgr->send_msg(session_id, "hello");
+  //  }
+  //}));
 
   ioc.run();
-  running = false;
+  // running = false;
   for (auto &i : thread_list) {
     i.join();
   }

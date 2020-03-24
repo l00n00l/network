@@ -357,19 +357,18 @@ struct tcp_proto::impl {
       }
     } break;
     case read_var_size: {
+      auto var_value =
+          g_net_dicts.get_string(net_vars_id, read_item().arg.var_name);
+
+      if (!var_value.empty()) {
+        dbuffer_size = to_uint64(var_value);
+      } else {
+        lserr << u8"协议错误!找不到变量:" << read_item().arg.var_name << " " >>
+            __FUNCTION__;
+      }
+
       auto sb_size = sbuffer.size();
       if (sb_size > 0) {
-        auto var_value =
-            g_net_dicts.get_string(net_vars_id, read_item().arg.var_name);
-
-        if (!var_value.empty()) {
-          dbuffer_size = to_uint64(var_value);
-        } else {
-          lserr << u8"协议错误!找不到变量:" << read_item().arg.var_name
-                << " " >>
-              __FUNCTION__;
-        }
-
         if (sb_size > dbuffer_size)
           sb_size = dbuffer_size;
         dbuffer = sbuffer_string(sbuffer, sb_size);

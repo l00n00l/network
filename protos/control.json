@@ -6,7 +6,7 @@
       "next_condition": ""
     },
     {
-      "read_size": "data",
+      "read_size": "size",
       "complie_regex": "(?<data>[\\s\\S]*)",
       "next_condition": ""
     }
@@ -18,7 +18,7 @@
       "next_condition": ""
     },
     {
-      "read_size": "data",
+      "read_size": "size",
       "complie_regex": "(?<data>[\\s\\S]*)",
       "next_condition": ""
     }

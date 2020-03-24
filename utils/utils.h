@@ -68,37 +68,70 @@ using float32 = float;
 using float64 = double;
 using float128 = boost::multiprecision::cpp_bin_float_quad;
 
+#define TOTRY try {
+#define TOCATCH                                                                \
+  }                                                                            \
+  catch (const boost::bad_lexical_cast &e) {                                   \
+    lserr << __FUNCTION__ >> ": data = " << data << " exception:" >>           \
+        std::string(e.what());                                                 \
+    return 0;                                                                  \
+  }
+
 inline int8 to_int8(const std::string &data) {
+  TOTRY
   return boost::lexical_cast<int8>(data);
+  TOCATCH
 }
 inline int16 to_int16(const std::string &data) {
+  TOTRY
   return boost::lexical_cast<int16>(data);
+  TOCATCH
 }
 inline int32 to_int32(const std::string &data) {
+  TOTRY
   return boost::lexical_cast<int32>(data);
+  TOCATCH
 }
 inline int64 to_int64(const std::string &data) {
+  TOTRY
   return boost::lexical_cast<int64>(data);
+  TOCATCH
 }
 inline uint8 to_uint8(const std::string &data) {
+  TOTRY
   return boost::lexical_cast<uint8>(data);
+  TOCATCH
 }
 inline uint16 to_uint16(const std::string &data) {
+  TOTRY
   return boost::lexical_cast<uint16>(data);
+  TOCATCH
 }
 inline uint32 to_uint32(const std::string &data) {
+  TOTRY
   return boost::lexical_cast<uint32>(data);
+  TOCATCH
 }
 inline uint64 to_uint64(const std::string &data) {
+  TOTRY
   return boost::lexical_cast<uint64>(data);
+  TOCATCH
 }
 inline float32 to_float32(const std::string &data) {
+  TOTRY
   return boost::lexical_cast<float32>(data);
+  TOCATCH
 }
 inline float64 to_float64(const std::string &data) {
+  TOTRY
   return boost::lexical_cast<float64>(data);
+  TOCATCH
 }
-inline float128 to_float128(const std::string &data) { return float128(data); }
+inline float128 to_float128(const std::string &data) {
+  TOTRY
+  return float128(data);
+  TOCATCH
+}
 
 inline void strcpy(char *des, const char *src, std::size_t size) {
   for (std::size_t i = 0; i < size; i++) {
