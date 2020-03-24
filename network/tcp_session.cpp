@@ -15,14 +15,14 @@ struct tcp_session::impl {
   impl(uint64 id, tcp::socket &socket, const std::string &proto_name)
       : id(id), socket(std::move(socket)), strand(socket.get_executor()),
         valid(false), writing(false), reconnect_timer(socket.get_executor()),
-        reconnecting(false) {
+        reconnecting(true) {
     proto_ptr = create_proto_server(proto_name);
   }
 
   impl(uint64 id, io_context &ioc, const std::string &proto_name)
       : id(id), socket(ioc), strand(socket.get_executor()), valid(false),
         writing(false), reconnect_timer(socket.get_executor()),
-        reconnecting(false) {
+        reconnecting(true) {
     proto_ptr = create_proto_client(proto_name);
   }
 };
@@ -184,7 +184,8 @@ void tcp_session::_do_connect() {
           return;
         }
         impl_ptr->valid = true;
-        _do_read_some();
+        impl_ptr->reconnecting = false;
+        _do_read();
       }));
 }
 
@@ -194,11 +195,13 @@ void tcp_session::_set_reconnect_timer() {
   }
   impl_ptr->reconnecting = true;
   impl_ptr->valid = false;
-  impl_ptr->socket.close();
+  try {
+    impl_ptr->socket.close();
+  } catch (const std::exception &e) {
+    lserr << __FUNCTION__ << " : " >> std::string(e.what());
+  }
   impl_ptr->socket = tcp::socket(impl_ptr->socket.get_executor());
   impl_ptr->reconnect_timer.expires_after(std::chrono::seconds(3));
-  impl_ptr->reconnect_timer.async_wait([this](error_code ec2) {
-    impl_ptr->reconnecting = false;
-    _do_connect();
-  });
+  impl_ptr->reconnect_timer.async_wait(
+      [this](error_code ec2) { _do_connect(); });
 }
