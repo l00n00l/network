@@ -2,7 +2,7 @@
   "server": [
     {
       "read_until": "\r\n",
-      "complie_regex": "(?<action>\\w+)\\s{1}(?<url>\\S+)\\s{1}(?<version>\\S+)\r\n",
+      "complie_regex": "(?<action>\\w+)\\s(?<url>\\S+)\\s(?<version>\\S+)\r\n",
       "next_condition": ""
     },
     {
@@ -12,7 +12,7 @@
     },
     {
       "read_size": "Content-Length",
-      "complie_regex": "",
+      "complie_regex": "<?<data>[\\s\\S]*)",
       "next_condition": ""
     }
   ],
@@ -24,12 +24,12 @@
     },
     {
       "read_until": "\r\n",
-      "complie_regex": "(?<key_0>.*):{0,1}(?<value_0>.*)\r\n",
+      "complie_regex": "(?<key_0>.*?):\\s(?<value_0>.*)\r\n",
       "next_condition": "\r\n"
     },
     {
       "read_size": "Content-Length",
-      "complie_regex": "",
+      "complie_regex": "<?<data>[\\s\\S]*)",
       "next_condition": ""
     }
   ]

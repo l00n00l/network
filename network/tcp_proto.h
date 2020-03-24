@@ -33,3 +33,8 @@ std::unique_ptr<tcp_proto> create_proto_server(const std::string &proto_name);
 std::unique_ptr<tcp_proto> create_proto_client(const std::string &proto_name);
 
 bool load_protos(const std::string &path);
+
+std::size_t get_read_item_size(const std::string &proto_name, std::size_t side);
+
+const std::string get_compile_regex(const std::string &proto_name,
+                                    std::size_t side, std::size_t index);

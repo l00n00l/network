@@ -1,0 +1,26 @@
+{
+  "server": [
+    {
+      "read_size": 4,
+      "complie_regex": "(?<size>[\\s\\S]*)",
+      "next_condition": ""
+    },
+    {
+      "read_size": "data",
+      "complie_regex": "(?<data>[\\s\\S]*)",
+      "next_condition": ""
+    }
+  ],
+  "client": [
+    {
+      "read_size": 4,
+      "complie_regex": "(?<size>[\\s\\S]*)",
+      "next_condition": ""
+    },
+    {
+      "read_size": "data",
+      "complie_regex": "(?<data>[\\s\\S]*)",
+      "next_condition": ""
+    }
+  ]
+}

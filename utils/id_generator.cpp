@@ -23,7 +23,7 @@ id_generator::~id_generator() {}
 uint64 id_generator::gen() {
   atomic_flag_acquire(impl_ptr->writing_flag);
 
-  auto ret = 0;
+  uint64 ret = 0;
   // 优先分配散列值, 因为可以释放内存
   if (impl_ptr->recycled_ids.size() > 0) {
     ret = *impl_ptr->recycled_ids.begin();

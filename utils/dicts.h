@@ -3,6 +3,7 @@
 class dicts;
 class dict_iterator {
 public:
+  dict_iterator() = default;
   dict_iterator(uint64 id, dicts *dict_ptr);
   ~dict_iterator();
   const std::string operator()();
@@ -62,7 +63,7 @@ public:
   void set_string(uint64 id, const std::string &key, std::string const &value);
 
 private:
-  friend struct dict_iterator;
+  friend class dict_iterator;
   struct impl;
   impl *impl_ptr;
 };

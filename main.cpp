@@ -42,7 +42,8 @@ int main() {
   g_session_mgr = std::make_shared<session_mgr>(ioc);
   g_server_mgr = std::make_shared<server_mgr>(ioc);
 
-  g_server_mgr->create_server(tcp::endpoint(tcp::v4(), g_control_port), "http");
+  g_server_mgr->create_server(tcp::endpoint(tcp::v4(), g_control_port),
+                              "control");
   // g_session_mgr->create_session(std::string("control"),
   //                              std::string("localhost"),
   //                              std::string("12345"));

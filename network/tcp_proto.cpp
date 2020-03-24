@@ -5,6 +5,61 @@
 #include "tcp_proto.h"
 #include <unordered_map>
 #include <vector>
+/*
+1、读取方式共有三种
+    read_some(省略,就是不要写出来就是这个选项);
+    read_until（读取到某个正则表达式结束）;
+    read_size(读取一定大小的数据,其值可以是uint也可以是前面读取到的某个数据的值);
+2、怎样解析数据（complie_regex）
+    这个一个正则表达式,如/(?<action>\\w+)\\s{1}(?<url>\\S+)\\s{1}(?<version>\\S+)\r\n/
+当正则表达式匹配成功后会根据表达式的变量名称而生成三个变量(action,url,version)以供读取
+有时候会需要把数据作为变量名，如/(?<key_0>.*?):\\s(?<value_0>.*)\r\n/
+当正则表达是匹配成功后 key_0 会被当做变量名,
+value_0会被当做key_0的值。其中key_与value_后面的数字是对应的,key_1对应value_1。
+3、是否结束规则的读取去根据下一个规则读取数据（next_condition）
+同样本项也是一个正则表达式。
+读取下一项条件
+1.本次读取的数据匹配正则表达式
+2.正则表达式为空
+{
+  "server": [
+    {
+      "read_until": "\r\n",
+      "complie_regex": "(?<action>\\w+)\\s(?<url>\\S+)\\s(?<version>\\S+)\r\n",
+      "next_condition": ""
+    },
+    {
+      "read_until": "\r\n",
+      "complie_regex": "(?<key_0>.*?):\\s(?<value_0>.*)\r\n",
+      "next_condition": "\r\n"
+    },
+    {
+      "read_size": "Content-Length",
+      "complie_regex": "<?<data>[\\s\\S]*)",
+      "next_condition": ""
+    }
+  ],
+  "client": [
+    {
+      "read_until": "\r\n",
+      "complie_regex":
+"(?<version>\\w+)\\s(?<status_code>\\S+)\\s(?<status>\\S+)\r\n",
+      "next_condition": ""
+    },
+    {
+      "read_until": "\r\n",
+      "complie_regex": "(?<key_0>.*?):\\s(?<value_0>.*)\r\n",
+      "next_condition": "\r\n"
+    },
+    {
+      "read_size": "Content-Length",
+      "complie_regex": "<?<data>[\\s\\S]*)",
+      "next_condition": ""
+    }
+  ]
+}
+
+*/
 struct read_item {
   read_type rtype;
   union {
@@ -128,12 +183,13 @@ inline bool load_read_items(Value &v, const std::string &proto_name,
         auto size = v[i]["read_size"].GetStringLength() + (std::size_t)1;
         temp_item.arg.var_name = new char[size];
         strcpy(temp_item.arg.var_name, v[i]["read_size"].GetString(), size);
-      } else if (!v[i]["read_size"].IsUint()) {
+      } else if (v[i]["read_size"].IsUint()) {
+        temp_item.rtype = read_size;
+        temp_item.arg.size = v[i]["read_size"].GetUint();
+      } else {
         lserr << proto_name << "[" << sidename << "][" << i >>
             u8"][read_size]应该是字符串或者正整数！";
         return false;
-        temp_item.rtype = read_size;
-        temp_item.arg.size = v[i]["read_size"].GetUint();
       }
     } else {
       temp_item.rtype = read_some;
@@ -230,6 +286,24 @@ bool load_protos(const std::string &path) {
     return false;
   }
   return true;
+}
+
+std::size_t get_read_item_size(const std::string &proto_name,
+                               std::size_t side) {
+  auto iter = proto_map.find(proto_name);
+  if (iter == proto_map.end()) {
+    return 0;
+  }
+  return iter->second[side].size();
+}
+
+const std::string get_compile_regex(const std::string &proto_name,
+                                    std::size_t side, std::size_t index) {
+  auto iter = proto_map.find(proto_name);
+  if (iter == proto_map.end()) {
+    return "";
+  }
+  return iter->second[side][index].compile_regex.str();
 }
 
 struct tcp_proto::impl {

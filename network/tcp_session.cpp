@@ -81,9 +81,6 @@ void tcp_session::_do_read() {
     _do_read_until();
     break;
   }
-  default:
-    _do_disconnect();
-    break;
   }
 }
 
