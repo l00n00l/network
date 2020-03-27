@@ -8,8 +8,8 @@ public:
   ~session_mgr();
 
   uint64 create_session(tcp::socket &socket, const std::string &proto_name);
-  uint64 create_session(const std::string &proto_name, const std::string &host,
-                        const std::string &port);
+  uint64 connect_to(const std::string &proto_name, const std::string &host,
+                    const std::string &port);
   void remove_session(uint64 id);
 
   bool session_valid(uint64 session_id);

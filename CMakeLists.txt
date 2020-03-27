@@ -1,6 +1,10 @@
 project(vcpu)
 cmake_minimum_required(VERSION 3.11)
 
+include_directories("C:\\soft\\python38\\include")
+link_directories("C:\\soft\\python38\\libs")
+add_compile_definitions(BOOST_PYTHON_STATIC_LIB)
+
 add_subdirectory(network)
 add_subdirectory(utils)
 

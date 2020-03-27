@@ -6,7 +6,7 @@ void log_info(const std::string &msg);
 void log_debug(const std::string &msg);
 void log_error(const std::string &msg);
 
-typedef void (*log_func)(const char *, std::size_t);
+typedef std::function<void(const char *, std::size_t)> log_func;
 
 void set_info_log_func(log_func func_ptr);
 void set_debug_log_func(log_func func_ptr);

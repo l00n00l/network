@@ -34,9 +34,9 @@ uint64 session_mgr::create_session(tcp::socket &socket,
   return ret;
 }
 
-uint64 session_mgr::create_session(const std::string &proto_name,
-                                   const std::string &host,
-                                   const std::string &port) {
+uint64 session_mgr::connect_to(const std::string &proto_name,
+                               const std::string &host,
+                               const std::string &port) {
   auto ret = bind_executor(impl_ptr->strand, [this, &host, &port, &proto_name] {
     tcp::resolver resolver(impl_ptr->strand);
     auto endpoints = resolver.resolve(host, port);

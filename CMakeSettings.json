@@ -13,7 +13,25 @@
       "variables": [
         {
           "name": "Boost_DIR",
-          "value": "C:/Boost/lib/cmake",
+          "value": "E:/c++/boost_1_72_0/stage/lib/cmake",
+          "type": "PATH"
+        }
+      ]
+    },
+    {
+      "name": "x64-Release",
+      "generator": "Ninja",
+      "configurationType": "RelWithDebInfo",
+      "buildRoot": "${projectDir}\\out\\build\\${name}",
+      "installRoot": "${projectDir}\\out\\install\\${name}",
+      "cmakeCommandArgs": "",
+      "buildCommandArgs": "-v",
+      "ctestCommandArgs": "",
+      "inheritEnvironments": [ "msvc_x64_x64" ],
+      "variables": [
+        {
+          "name": "Boost_DIR",
+          "value": "E:/c++/boost_1_72_0/stage/lib/cmake",
           "type": "PATH"
         }
       ]

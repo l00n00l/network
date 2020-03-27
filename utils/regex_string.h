@@ -33,10 +33,8 @@ public:
   regstring();
   ~regstring();
 
-  bool parse_regex(const char *regex_ptr, std::size_t size);
   bool parse_regex(const std::string &regex_str);
-  bool set(const char *name, const char *data, std::size_t size);
-  bool set(const char *name, const char *data);
+  bool set(const std::string &name, const std::string &data);
 
   const char *c_str();
   std::size_t size();

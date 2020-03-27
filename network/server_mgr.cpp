@@ -19,14 +19,16 @@ server_mgr::server_mgr(io_context &ioc) { impl_ptr = new impl(ioc); }
 
 server_mgr::~server_mgr() { delete impl_ptr; }
 
-void server_mgr::create_server(tcp::endpoint endpoint,
-                               const std::string &proto_name) {
-  bind_executor(impl_ptr->strand, [this, &endpoint, &proto_name] {
+uint64 server_mgr::create_server(tcp::endpoint endpoint,
+                                 const std::string &proto_name) {
+  auto ret = bind_executor(impl_ptr->strand, [this, &endpoint, &proto_name] {
     auto new_id = impl_ptr->id_gen.gen();
     auto new_server =
         std::make_shared<tcp_server>(impl_ptr->ioc, endpoint, proto_name);
     impl_ptr->servers[new_id] = new_server;
+    return new_id;
   })();
+  return ret;
 }
 
 void server_mgr::destroy_server(uint64 server_id) {

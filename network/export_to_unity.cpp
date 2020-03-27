@@ -57,7 +57,7 @@ _DLLExport void disconnect(uint64 session_id) {
 _DLLExport uint64 connect_server(char *proto_name, char *host, char *port) {
   if (!unity_session_mgr)
     return 0;
-  return unity_session_mgr->create_session(proto_name, host, port);
+  return unity_session_mgr->connect_to(proto_name, host, port);
 }
 _DLLExport void send_msg(uint64 session_id, char *msg) {
   if (unity_session_mgr)
@@ -235,7 +235,7 @@ _DLLExport bool regstring_parse_regex(uint64 id, const char *r,
   atomic_flag_acquire(regstring_map_flag);
   auto iter = regstring_map.find(id);
   if (iter != regstring_map.end()) {
-    ret = iter->second.parse_regex(r, rsize);
+    ret = iter->second.parse_regex(std::string(r, rsize));
   }
   atomic_flag_release(regstring_map_flag);
   return ret;
@@ -245,7 +245,7 @@ _DLLExport void regstring_set(uint64 id, const char *name, const char *data,
   atomic_flag_acquire(regstring_map_flag);
   auto iter = regstring_map.find(id);
   if (iter != regstring_map.end()) {
-    iter->second.set(name, data, data_size);
+    iter->second.set(name, std::string(data, data_size));
   }
   atomic_flag_release(regstring_map_flag);
 }
@@ -272,7 +272,7 @@ _DLLExport bool make_message(const char *proto_name, int32 side, uint64 data_id,
 
     for (auto &name : rs.names()) {
       cache = g_net_dicts.get_string(data_id, name);
-      rs.set(name.c_str(), cache.c_str(), cache.size());
+      rs.set(name.c_str(), cache);
     }
     ss << rs.str();
   }

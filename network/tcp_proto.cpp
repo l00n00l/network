@@ -5,6 +5,9 @@
 #include "tcp_proto.h"
 #include <unordered_map>
 #include <vector>
+
+using namespace rapidjson;
+
 /*
 1、读取方式共有三种
     read_some(省略,就是不要写出来就是这个选项);
@@ -207,8 +210,8 @@ inline bool load_read_items(Value &v, const std::string &proto_name,
     }
 
     regstring s;
-    if (!s.parse_regex(v[i]["complie_regex"].GetString(),
-                       v[i]["complie_regex"].GetStringLength())) {
+    if (!s.parse_regex(std::string(v[i]["complie_regex"].GetString(),
+                                   v[i]["complie_regex"].GetStringLength()))) {
       lserr << proto_name << "[" << sidename << "][" << i >>
           u8"][complie_regex]表达式错误，请检查！";
       return false;

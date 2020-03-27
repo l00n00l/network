@@ -3,8 +3,10 @@
 #include <boost/locale.hpp>
 #include <sstream>
 
+using namespace rapidjson;
+
 Document json_load_fs(const char *filename) {
-  ifstream ifs(filename);
+  std::ifstream ifs(filename);
   IStreamWrapper isw(ifs);
   Document d;
   ParseResult ok = d.ParseStream(isw);
@@ -31,7 +33,7 @@ Document json_load(const char *data_ptr, std::size_t data_size) {
 }
 
 void json_write_fs(Document &d, const char *filename) {
-  ofstream ofs(filename);
+  std::ofstream ofs(filename);
   OStreamWrapper osw(ofs);
   Writer<OStreamWrapper> writer(osw);
   d.Accept(writer);

@@ -269,7 +269,7 @@ void dicts::build_c_str(uint64 id, const std::string &key,
         auto data = boost::any_cast<std::string>(&(iter2->second));
         data_ptr = data->c_str();
         size = data->size();
-      } catch (const boost::bad_any_cast &e) {
+      } catch (const boost::bad_any_cast &) {
         lserr << u8"数据转换错误，目标类型不是：string!" >> __FUNCTION__;
       }
     }

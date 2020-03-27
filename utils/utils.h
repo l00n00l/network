@@ -1,5 +1,9 @@
 #pragma once
 
+#include "lua/lua.hpp"
+
+#include "LuaBridge/LuaBridge.h"
+
 #include "log.h"
 #include <atomic>
 #include <boost/asio.hpp>
@@ -14,6 +18,7 @@
 #include <cstdint>
 #include <sstream>
 #include <string>
+
 using boost::locale::conv::from_utf;
 using boost::locale::conv::to_utf;
 using boost::locale::conv::utf_to_utf;
@@ -23,6 +28,7 @@ namespace fsys = boost::filesystem;
 typedef boost::match_results<std::string::const_iterator> match_results_str;
 using boost::regex;
 using boost::regex_match;
+using boost::regex_replace;
 using boost::regex_search;
 
 using boost::asio::async_connect;

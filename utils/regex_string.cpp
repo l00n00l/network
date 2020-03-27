@@ -576,31 +576,12 @@ regstring::~regstring() {
   }
 }
 
-bool regstring::parse_regex(const char *regex_ptr, std::size_t size) {
-  impl_ptr->s.clear();
-  return make_regex_string(regex_ptr, size, impl_ptr->s);
-}
-
 bool regstring::parse_regex(const std::string &regex_str) {
   impl_ptr->s.clear();
   return make_regex_string(regex_str.c_str(), regex_str.size(), impl_ptr->s);
 }
 
-bool regstring::set(const char *name, const char *data, std::size_t size) {
-  if (!impl_ptr) {
-    return false;
-  }
-
-  for (auto &i : impl_ptr->s) {
-    if (i.name == name) {
-      i.data = std::string(data, size);
-    }
-  }
-
-  return true;
-}
-
-bool regstring::set(const char *name, const char *data) {
+bool regstring::set(const std::string &name, const std::string &data) {
   if (!impl_ptr) {
     return false;
   }

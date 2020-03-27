@@ -43,24 +43,14 @@ int main() {
 
   g_server_mgr->create_server(tcp::endpoint(tcp::v4(), g_control_port),
                               "control");
-  // auto session_id =
-  //    g_session_mgr->create_session("control", "localhost", "12345");
 
   auto core_count = std::thread::hardware_concurrency();
   std::list<std::thread> thread_list;
   for (size_t i = 1; i < core_count; i++) {
     thread_list.push_back(std::thread([&ioc] { ioc.run(); }));
   }
-  // bool running = true;
-  // thread_list.push_back(std::thread([&] {
-  //  while (running) {
-  //    std::this_thread::sleep_for(std::chrono::seconds(1));
-  //    g_session_mgr->send_msg(session_id, "hello");
-  //  }
-  //}));
-
   ioc.run();
-  // running = false;
+
   for (auto &i : thread_list) {
     i.join();
   }
